@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{admin/layout/default}">
+
+	<!-- head 삽입공간 -->
+	<head>
+	</head>
+	
+	<th:block layout:fragment="jsFile">
+		<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+	</th:block>
+	
+	<th:block layout:fragment="jsScript">
+		<script>
+			$('#addProductBtn').click(e => {
+				e.preventDefault();
+				const $formTags = $('#addProductForm').find('input, select');
+				let isSubmit = true;
+				$formTags.each((idx, element) => {
+					const value = $(element).val();
+					if(!value){
+						const id = $(element).attr('id');
+						const cate = $(`label[for="${id}"]`).text();
+						alert(`${cate} 필수 입력항목입니다.`);
+						$(element).focus();
+						isSubmit = false;
+						return false;
+					}
+				});	
+				if(isSubmit) $('#addProductForm').submit();
+			});
+			
+		</script>
+	</th:block>
+	
+	<!-- 페이지 삽입공간 -->
+	<th:block layout:fragment="content">
+		<div class="content-header">
+            <div>
+                <h2 class="content-title card-title" th:text="${title}"></h2>
+            </div>
+        </div>
+        <div class="card mb-4 col-8">
+        	<form id="addProductForm" th:action="@{/admin/product/addProduct}" method="post">
+	            <header class="card-header">
+	                <div class="row align-items-end pe-4">
+	                    <div class="col-md-2 col-2 ms-auto">
+	                        <button type="submit" id="addProductBtn"
+	                        		class="btn btn-success w-100 rounded font-lg hover-up text-white justify-content-center fs-6" >상품등록</button>
+	                    </div>
+	                    <div class="col-md-2 col-2">
+	                        <button type="reset" onclick="location.href='/admin/product/productList'"
+	                        		class="btn btn-warning w-100 rounded font-lg hover-up text-white justify-content-center fs-6" >상품등록취소</button>
+	                    </div>
+	                </div>
+	            </header>
+	            <div class="card-body">
+	                <div class="card-body">
+	                    <div class="row">
+	                        <div class="col-md-2 me-auto">
+	                            <h4>1. 필수 입력 항목</h4>
+	                        </div>
+	                        <div class="col-md-9">
+	                        	<div class="row">
+		                            <div class="mb-4">
+		                                <label class="form-label fs-6" for="productName">상품명</label>
+		                                <input type="text" id="productName" name="productName" 
+		                                	   placeholder="상품명을 입력해주세요" class="form-control col-8 fs-6" />
+		                            </div>                        		
+	                        	</div>
+	                        	<div class="row">
+		                            <div class="mb-4">
+		                                <label class="form-label fs-6" for="productUnitPrice">상품가격</label>
+		                                <input type="number" id="productUnitPrice" name="productUnitPrice" 
+		                                	   placeholder="상품가격을 입력해주세요" class="form-control col-8 fs-6" />
+		                            </div>                        		
+	                        	</div>
+	                        	<div class="row">
+		                            <div class="mb-4">
+		                                <label class="form-label fs-6" for="vendorCode">거래처목록</label>
+		                                <select class="form-select text-center fs-6" id="vendorCode" name="vendorCode">
+		                                    <option value=""> 거래처를 선택해주세요 </option>
+		                                    <th:block th:if="${not #lists.isEmpty(vendorList)}"
+		                                    		  th:each="l : ${vendorList}">
+		                                    	<option th:value="${l.vendorCode}" 
+		                                    			th:text="${l.vendorName + '&emsp;&emsp;::::::&emsp;&emsp;' + l.vendorBrno}"></option>
+		                                    </th:block>
+		                                </select>
+		                            </div>                        		
+	                        	</div>	                            
+	                        </div> <!-- col.// -->
+	                    </div> <!-- row.// -->
+	                </div>
+	                <!-- table-responsive end// -->
+	            </div>
+        	</form>
+        </div>
+	</th:block>
+	
+</html>

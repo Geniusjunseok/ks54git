@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	  layout:decorate="~{admin/layout/default}">
+
+	<!-- head 삽입 공간  -->
+	<head></head>
+
+	<th:block layout:fragment="jsFile">
+		
+	</th:block>
+	
+	<th:block layout:fragment="jsScript">
+		<script th:inline="javascript">
+			const rowPerPage = /*[[${rowPerPage}]]*/'';
+			if(rowPerPage) {
+				$('.page-link').each((idx, item) => {
+					let href = $(item).attr('href');
+					let separator = '?';
+					if(href.includes('?')) separator = '&';
+					href += `${separator}rowPerPage=${rowPerPage}`;
+					$(item).attr('href', href);
+				});
+			}
+			$('#rowPerPage').change(function() {
+				const href = location.href;
+				const url = new URL(href);
+				const urlParams = url.searchParams;
+				const currentPage = urlParams.get('currentPage');
+				if(currentPage) urlParams.set('currentPage', currentPage);
+				urlParams.set('rowPerPage', $(this).val());
+				location.href = `${url.pathname}?${urlParams.toString()}`;
+			});
+		</script>
+	</th:block>
+	
+	<!-- 페이지 삽입 공간 -->
+	<th:block layout:fragment="content">	
+			 <div class="content-header">
+		         <div>
+		             <h2 class="content-title card-title" th:text="${title}"></h2>
+		         </div>
+	         </div>
+	         <div class="card mb-4">
+	         	<header class="card-header">
+  					<form th:action="@{/admin/member/searchLoginHistory}" method="get">
+	  					<div class="row gx-3">
+	                        <div class="col-lg-2 col-md-3 col-12">
+	                            <select class="form-select" name="searchKey">
+	                                <option value="memberId" th:selected="${searchKey == 'memberid'}">회원아이디</option>
+	                                <option value="memberName" th:selected="${searchKey == 'memberName'}">회원이름</option>
+	                                <option value="memberEmail" th:selected="${searchKey == 'memberemail'}">회원이메일</option>
+	                            </select>
+	                        </div>
+	                    	<div class="col-lg-4 col-md-5">
+	                        	<input type="text" name="searchValue" th:value="${searchValue}" placeholder="검색어를 입력해주세요." class="form-control" />
+	                        </div>
+	                        <div class="col-lg-1 col-md-1 me-auto">
+	                        	<button id="searchBtn" type="submit" class="form-control btn btn-primary">검색</button>
+	                        </div>
+	                        <div class="col-lg-2 col-md-3 col-12">
+	                            <select class="form-select" name="rowPerPage" id="rowPerPage">
+	                                <option value="5" th:selected="${rowPerPage eq 5}">Show 5</option>
+	                                <option value="10" th:selected="${rowPerPage eq 10}">Show 10</option>
+	                                <option value="15" th:selected="${rowPerPage eq 15}">Show 15</option>
+	                            </select>
+	                        </div>
+	                    </div>
+                    </form>
+	            </header>
+	            <div class="card-body">
+		            <div class="table-responsive">
+		                <div class="table-responsive">
+		                    <table class="table align-middle table-nowrap mb-0">
+		                        <thead class="table-light text-center">
+		                            <tr>
+		                                <th scope="col">
+		                                    <div class="form-check align-middle">
+		                                        <input class="form-check-input" type="checkbox" id="transactionCheck01" />
+		                                        <label class="form-check-label" for="transactionCheck01"></label>
+		                                    </div>
+		                                </th>
+		                                <th class="align-middle" scope="col">로그인번호</th>
+		                                <th class="align-middle" scope="col">로그인아이디</th>
+		                                <th class="align-middle" scope="col">로그인아이피</th>
+		                                <th class="align-middle" scope="col">로그인일시</th>
+		                                <th class="align-middle" scope="col">회원이름</th>
+		                                <th class="align-middle" scope="col">회원등급</th>
+		                                <th class="align-middle" scope="col">회원이메일</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody class="text-center">
+		                            <tr th:if="${!#lists.isEmpty(loginHistoryList)}"
+		                            	th:each="l : ${loginHistoryList}">
+		                                <td>
+		                                    <div class="form-check">
+		                                        <input class="form-check-input check-member" type="checkbox" th:value="${l.loginNum}" />
+		                                    </div>
+		                                </td>
+		                                <th:block th:if="${l.loginNum ne null}">		                                
+			                                <td th:text="${l.loginNum}">1</td>
+			                                <td th:text="${l.loginId}">ksmartid1</td>
+			                                <td th:text="${l.loginIp}">123.123.123.123</td>
+			                                <td th:text="${l.loginDate}">2025-04-29</td>
+		                                </th:block>
+		                                <th:block th:unless="${l.loginNum ne null}">
+		                                	<td colspan="4">로그인 이력 없음</td>
+		                                </th:block>
+		                                <th:block th:object="${l.memberInfo}">		                               		
+			                              	<td th:text="*{memberName}">홍01</td>
+			                                <td>
+			                                    <th:block th:switch="*{memberGrade}">
+			                                    	<span th:case="${'mbr_grd_1'}"
+			                                    		  class="badge badge-pill badge-soft-success">관리자</span>
+			                                    	<span th:case="${'mbr_grd_2'}"
+			                                    		  class="badge badge-pill badge-soft-info">판매자</span>
+			                                    	<span th:case="${'mbr_grd_3'}"
+			                                    		  class="badge badge-pill badge-soft-warning">구매자</span>
+			                                    	<span th:case="*"
+			                                    		  class="badge badge-pill badge-soft-primary">일반회원</span>
+			                                    </th:block>
+			                                </td>
+			                                <td th:text="*{memberEmail}">ksmartid1@ksmart.or.kr</td>
+		                                </th:block>
+		                            </tr>
+		                            <tr th:unless="${!#lists.isEmpty(loginHistoryList)}">
+		                            	<td colspan="7">등록없음</td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+		                </div>
+		            </div>
+		            <!-- table-responsive end// -->
+	         	</div>
+	         </div>
+             <div class="pagination-area mt-30 mb-50">
+	       		<nav aria-label="Page navigation example">
+		           <ul class="pagination justify-content-center">
+		               <li class="page-item">
+		               		<a class="page-link" th:href="@{/admin/member/loginHistoryList}"><i class="material-icons md-first_page"></i></a>
+		               </li>
+		               <li class="page-item" th:classappend="${currentPage < 2} ? 'disabled'">
+		               		<a class="page-link" th:href="@{/admin/member/loginHistoryList(currentPage=${currentPage - 1})}">
+		               			<i class="material-icons md-chevron_left"></i>
+		               		</a>
+		               </li>
+		               <th:block th:each="num : ${#numbers.sequence(startPageNum, endPageNum)}">		               
+			               <li class="page-item" th:classappend="${num eq currentPage} ? 'active disabled'">
+			               		<a class="page-link" th:href="@{/admin/member/loginHistoryList(currentPage=${num})}"
+			               			th:text="${num < 10 ? '0' + num : num}">01</a>
+			               </li>
+		               </th:block>
+		               <li class="page-item" th:classappend="${currentPage eq lastPage} ? 'disabled'">
+		                   <a class="page-link" th:href="@{/admin/member/loginHistoryList(currentPage=${currentPage + 1})}">
+	 	                 		 <i class="material-icons md-chevron_right"></i>
+		                   </a>
+		               </li>
+		               <li class="page-item">
+		                   <a class="page-link" th:href="@{/admin/member/loginHistoryList(currentPage=${lastPage})}">
+		                   		<i class="material-icons md-last_page"></i>
+		                   </a>
+		               </li>
+		           </ul>
+		       	</nav>
+  			 </div>
+<!-- content-main end// -->
+	</th:block>
+</html>

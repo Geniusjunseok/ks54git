@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="ksmybatis.admin.common.mapper.CommonMapper">
+  	<!-- id: interface클래스(mapper)의 추상메소드명 -->
+  	<!-- resultType: domain class명 -->
+  	<!-- cc.comm_group_cd = #{groupCode};  'comm_group_1' -->
+	<!-- cc.comm_group_cd = ${groupCode};  comm_group_1 -->
+  	<select id="getCommonCodeListByGroupCode" resultType="ksmybatis.admin.common.domain.CommonCode"
+  			parameterType="String">
+  		/* 공통코드 조회 */
+  		SELECT 
+			cc.comm_group_cd 	AS commonGroupCode,
+			cc.comm_cd  		AS commonCode,
+			cc.comm_nm 			AS commonCodeName 
+		FROM 
+			comm_code cc INNER JOIN comm_group_code cgc
+			ON cc.comm_group_cd = cgc.comm_group_cd
+		WHERE
+			cc.comm_group_cd = #{groupCode};
+  	</select>
+  </mapper>

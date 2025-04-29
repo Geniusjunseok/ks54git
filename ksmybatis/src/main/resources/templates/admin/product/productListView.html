@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	  layout:decorate="~{admin/layout/default}">
+
+	<!-- head 삽입 공간  -->
+	<head></head>
+
+	<th:block layout:fragment="jsFile">
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</th:block>
+	
+	<th:block layout:fragment="jsScript">
+		<script>
+		$('.removeBtn').click(e => {
+			e.preventDefault();
+			const productCode = $(e.target).data('productCode');
+			Swal.fire({
+			    title: "상품삭제",
+			    text: "상품을 삭제 하시겠습니까?",
+			    icon: "warning",
+			    showCancelButton: true,
+			    confirmButtonColor: "#d33",
+			    cancelButtonColor: "#3085d6",
+			    confirmButtonText: "상품삭제",
+			    cancelButtonText: "삭제취소"
+			}).then((result) => {
+			    if (result.isDismissed) {
+			        Swal.fire({
+			            title: "삭제취소",
+			            icon: "error"
+			        });
+			        return;
+			    }
+
+			    if (result.isConfirmed) {
+			        Swal.fire({
+			            title: "삭제확인",
+			            text: "정말로 상품을 삭제 하시겠습니까?",
+			            icon: "warning",
+			            showCancelButton: true,
+			            confirmButtonColor: "#d33",
+			            cancelButtonColor: "#3085d6",
+			            confirmButtonText: "삭제",
+			            cancelButtonText: "취소"
+			        }).then((confirmResult) => {
+			            if (confirmResult.isConfirmed) {
+			                $.ajax({
+			                    url: '/admin/product/removeProduct',
+			                    method: 'post',
+			                    data: { 'productCode': productCode },
+			                    dataType: 'json',
+			                    success: function(response) {
+			                        Swal.fire({
+			                            title: "상품이 삭제되었습니다.",
+			                            icon: "success"
+			                        }).then(result => {
+			                        	location.reload();				                        	
+			                        });
+			                    }
+			                });
+			            } else {
+			                Swal.fire({
+			                    title: "삭제취소",
+			                    icon: "info"
+			                });
+			            }
+			        });
+			    }
+			});
+		});
+		</script>
+	</th:block>
+	
+	<!-- 페이지 삽입 공간 -->
+	<th:block layout:fragment="content">	
+			 <div class="content-header">
+		         <div>
+		             <h2 class="content-title card-title" th:text="${title}"></h2>
+		         </div>
+	         </div>
+	         <div class="card mb-4">
+	         	<header class="card-header">
+  					<div class="row gx-3">
+                        <div class="col-lg-2 col-md-3 col-12">
+                            <select class="form-select">
+                                <option>Status</option>
+                                <option>Active</option>
+                                <option>Disabled</option>
+                                <option>Show all</option>
+                            </select>
+                        </div>
+                    	<div class="col-lg-4 col-md-5">
+                        	<input type="text" placeholder="Search..." class="form-control" />
+                        </div>
+                        <div class="col-lg-1 col-md-1 me-auto">
+                        	<button type="button" class="form-control btn btn-primary">검색</button>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-12">
+                            <select class="form-select">
+                                <option>Show 20</option>
+                                <option>Show 30</option>
+                                <option>Show 40</option>
+                            </select>
+                        </div>
+                    </div>
+	            </header>
+	            <div class="card-body">
+		            <div class="table-responsive">
+		                <div class="table-responsive">
+		                    <table class="table align-middle table-nowrap mb-0">
+		                        <thead class="table-light text-center">
+		                            <tr>
+		                                <th scope="col">
+		                                    <div class="form-check align-middle">
+		                                        <input class="form-check-input" type="checkbox" id="transactionCheck01" />
+		                                        <label class="form-check-label" for="transactionCheck01"></label>
+		                                    </div>
+		                                </th>
+		                                <th class="align-middle" scope="col">상품코드</th>
+		                                <th class="align-middle" scope="col">거래처코드</th>
+		                                <th class="align-middle" scope="col">상품명</th>
+		                                <th class="align-middle" scope="col">상품단가</th>
+		                                <th class="align-middle" scope="col">상품등록일</th>
+		                                <th class="align-middle" scope="col">수정</th>
+		                                <th class="align-middle" scope="col">삭제</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody class="text-center">
+		                            <tr th:if="${!#lists.isEmpty(productList)}"
+		                            	th:each="l : ${productList}">
+		                                <td>
+		                                    <div class="form-check">
+		                                        <input class="form-check-input check-member" type="checkbox" th:value="${l.productCode}" />
+		                                    </div>
+		                                </td>
+		                                <td><a th:href="@{#}" class="fw-bold" th:text="${l.productCode}">prod_1</a></td>
+		                                <td th:text="${l.vendorCode}">vend_1</td>
+		                                <td th:text="${l.productName}">모니터</td>
+		                                <td th:text="|₩ ${#numbers.formatInteger(l.productUnitPrice, 3, 'COMMA')}|">111000</td>
+		                                <td th:text="${l.productRegDate}">2025-04-22</td>
+		                                <td>
+		                                    <a th:href="@{/admin/product/modifyProduct(productCode=${l.productCode})}" class="btn btn-warning btn-sm text-white">수정</a>
+		                                </td>
+		                                <td>
+		                                    <a href="#" class="btn btn-danger btn-sm removeBtn"
+		                                     th:data-product-code="${l.productCode}">삭제</a>
+		                                </td>
+		                            </tr>
+		                            <tr th:unless="${!#lists.isEmpty(productList)}">
+		                            	<td colspan="7">등록없음</td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+		                </div>
+		            </div>
+		            <!-- table-responsive end// -->
+	         	</div>
+	         </div>
+	                <div class="pagination-area mt-30 mb-50">
+	                    <nav aria-label="Page navigation example">
+	                        <ul class="pagination justify-content-center">
+	                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">02</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">03</a></li>
+	                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">16</a></li>
+	                            <li class="page-item">
+	                                <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
+	                            </li>
+	                        </ul>
+	                    </nav>
+	                </div>
+	            <!-- content-main end// -->
+	</th:block>
+</html>

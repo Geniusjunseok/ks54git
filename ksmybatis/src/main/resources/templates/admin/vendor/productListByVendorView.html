@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	  layout:decorate="~{admin/layout/default}">
+
+	<!-- head 삽입 공간  -->
+	<head></head>
+
+	<th:block layout:fragment="jsFile">
+		
+	</th:block>
+	
+	<th:block layout:fragment="jsScript">
+
+	</th:block>
+	
+	<!-- 페이지 삽입 공간 -->
+	<th:block layout:fragment="content">	
+			 <div class="content-header">
+		         <div>
+		             <h2 class="content-title card-title" th:text="${title}"></h2>
+		         </div>
+	         </div>
+	         <div class="card mb-4">
+	         	<header class="card-header">
+  					<div class="row gx-3">
+                        <div class="col-lg-2 col-md-3 col-12">
+                            <select class="form-select">
+                                <option>Status</option>
+                                <option>Active</option>
+                                <option>Disabled</option>
+                                <option>Show all</option>
+                            </select>
+                        </div>
+                    	<div class="col-lg-4 col-md-5">
+                        	<input type="text" placeholder="Search..." class="form-control" />
+                        </div>
+                        <div class="col-lg-1 col-md-1 me-auto">
+                        	<button type="button" class="form-control btn btn-primary">검색</button>
+                        </div>
+                        <div class="col-lg-2 col-md-3 col-12">
+                            <select class="form-select">
+                                <option>Show 20</option>
+                                <option>Show 30</option>
+                                <option>Show 40</option>
+                            </select>
+                        </div>
+                    </div>
+	            </header>
+	            <div class="card-body">
+		            <div class="table-responsive">
+		                <div class="table-responsive">
+		                    <table class="table align-middle table-nowrap mb-0">
+		                        <thead class="table-light text-center">
+		                            <tr>
+		                                <th scope="col">
+		                                    <div class="form-check align-middle">
+		                                        <input class="form-check-input" type="checkbox" id="transactionCheck01" />
+		                                        <label class="form-check-label" for="transactionCheck01"></label>
+		                                    </div>
+		                                </th>
+		                                <th class="align-middle" scope="col">거래처코드</th>
+		                                <th class="align-middle" scope="col">사업자번호</th>
+		                                <th class="align-middle" scope="col">거래처명</th>
+		                                <th class="align-middle" scope="col">거래처주소</th>
+		                                <th class="align-middle" scope="col">거래처상세주소</th>
+		                                <th class="align-middle" scope="col">담당자아이디</th>
+		                                <th class="align-middle" scope="col">담당자이메일</th>
+		                                <th class="align-middle" scope="col">상품코드</th>
+		                                <th class="align-middle" scope="col">상품명</th>
+		                                <th class="align-middle" scope="col">상품가격</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody class="text-center">
+		                            
+		                            <th:block th:if="${!#lists.isEmpty(vendorList)}"
+		                            	th:each="l : ${vendorList}">
+		                            	
+		                            	<th:block th:if="${!#lists.isEmpty(l.productsList)}"
+		                            			  th:each="pl : ${l.productsList}">
+		                            		<tr>
+			                            		<td>
+				                                	<div class="form-check">
+			                                        	<input class="form-check-input check-member" type="checkbox" th:value="${l.vendorCode}" />
+				                                    </div>
+			                              	  	</td>
+		                                  		<td>
+				                                	<a th:href="@{#}" class="fw-bold" th:text="${l.vendorCode}">vend_2</a>
+			                              	  	</td>
+				                                <td th:text="${l.vendorBrno}">002-02-00002</td>
+				                                <td th:text="${l.vendorName}">판매처2</td>
+				                                <td th:text="${l.vendorAddress}">판매처주소</td>
+				                                <td th:text="${l.vendorDetailAddress}">판매처상세주소</td>
+				                                <td th:text="${l.vendorMemberId}">ksmartid4</td>
+				                                <td th:text="${l.sellerInfo.memberEmail}">ksmartid4@ksmart.or.kr</td>
+												<td th:text="${pl.productCode}">prod_10</td>
+				                                <td th:text="${pl.productName}">프린터</td>
+				                                <td th:text="${pl.productUnitPrice eq null ? '가격 미책정' : '₩'+ #numbers.formatInteger(pl.productUnitPrice, 3, 'COMMA')}">130.000</td> 
+		                               		</tr>
+			                            </th:block>
+		                                	
+			                            	
+			                            <th:block th:unless="${!#lists.isEmpty(l.productsList)}">
+				                            <tr>	
+				                            	<td>
+				                                	<div class="form-check">
+			                                        	<input class="form-check-input check-member" type="checkbox" th:value="${l.vendorCode}" />
+				                                    </div>
+			                              	  	</td>
+		                                  		<td>
+				                                	<a th:href="@{#}" class="fw-bold" th:text="${l.vendorCode}">vend_2</a>
+			                              	  	</td>
+				                            	<td th:text="${l.vendorBrno}">002-02-00002</td>
+				                                <td th:text="${l.vendorName}">판매처2</td>
+				                                <td th:text="${l.vendorAddress}">판매처주소</td>
+				                                <td th:text="${l.vendorDetailAddress}">판매처상세주소</td>
+				                                <td th:text="${l.vendorMemberId}">ksmartid4</td>
+				                                <td th:text="${l.sellerInfo.memberEmail}">ksmartid4@ksmart.or.kr</td>
+			                            		<td colspan="3">등록된 상품없음</td>
+		                            		</tr>
+		                            	</th:block>
+		                            </th:block>
+		                            <tr th:unless="${!#lists.isEmpty(vendorList)}">
+		                            	<td colspan="11">등록없음</td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+		                </div>
+		            </div>
+		            <!-- table-responsive end// -->
+	         	</div>
+	         </div>
+	                <div class="pagination-area mt-30 mb-50">
+	                    <nav aria-label="Page navigation example">
+	                        <ul class="pagination justify-content-center">
+	                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">02</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">03</a></li>
+	                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">16</a></li>
+	                            <li class="page-item">
+	                                <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
+	                            </li>
+	                        </ul>
+	                    </nav>
+	                </div>
+	            <!-- content-main end// -->
+	</th:block>
+</html>

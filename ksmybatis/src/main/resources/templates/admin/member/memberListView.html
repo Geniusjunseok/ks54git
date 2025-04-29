@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  	  layout:decorate="~{admin/layout/default}">
+
+	<!-- head 삽입 공간  -->
+	<head></head>
+
+	<th:block layout:fragment="jsFile">
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</th:block>
+	
+	<th:block layout:fragment="jsScript">
+		<script>
+			$('.remove-btn').click(e => {
+				e.preventDefault();
+				const memberId = $(e.target).data('memberId');
+				Swal.fire({
+			  		title: "회원탈퇴",
+				  	text: "정말로 회원탈퇴 하시겠습니까?",
+				  	icon: "warning",
+				  	showCancelButton: true,
+				  	confirmButtonColor: "#3085d6",
+				  	cancelButtonColor: "#d33",
+				  	confirmButtonText: "회원탈퇴",
+				  	cancelButtonText: "탈퇴취소"
+				}).then(async (result) => {
+					console.log(result);
+					/**
+					 * result.isConfirmed : 확인 버튼 누른 유무
+					 * result.isDismissed : 취소 버튼 누른 유무
+					 */
+					if (result.isDismissed) {
+				    Swal.fire({
+				      title: "탈퇴취소!",
+				      icon: "error"
+				    });
+				    return ;
+				  }
+					
+					const { value: password } = await Swal.fire({
+						title: "회원탈퇴",
+						input: "password",
+						inputPlaceholder: "패스워드 입력해주세요",
+						inputAttributes: {
+							maxlength: "10",
+							autocapitalize: "off",
+						 	autocorrect: "off"
+							},
+							showCancelButton: true,
+							confirmButtonText: '회원탈퇴',
+							cancelButtonText: '취소'
+						});
+						const optionObj = {
+						   	title: "탈퇴취소",
+				        	icon: "error"
+						}
+						
+						if (password) {
+
+					    	const request = $.ajax({
+								url : '/admin/member/removeMember',
+								method : 'post',
+								data : { 'memberId' : memberId, 'memberPw' : password},
+								dataType : 'json',
+								async : false
+					    	});
+					    	
+					    	request.done(isDelete => {
+								if(isDelete) {
+								  	optionObj.title = '회원탈퇴';
+								  	optionObj.text = '회원탈퇴가 정상적으로 처리되었습니다.';
+								  	optionObj.icon = 'success'
+								}
+					    	});
+					    	
+					    	request.fail((jqXHR, textStatus, error) => {
+								console.log(jqXHR, textStatus, error);
+					    	});
+						  
+						}
+						Swal.fire(optionObj).then(result => location.reload());
+					});
+				});
+			
+			$('#searchBtn').click(e => {
+				
+			})	
+		</script>
+	</th:block>
+	
+	<!-- 페이지 삽입 공간 -->
+	<th:block layout:fragment="content">	
+			 <div class="content-header">
+		         <div>
+		             <h2 class="content-title card-title" th:text="${title}"></h2>
+		         </div>
+	         </div>
+	         <div class="card mb-4">
+	         	<header class="card-header">
+  					<form th:action="@{/admin/member/searchMember}" method="get">
+	  					<div class="row gx-3">
+	                        <div class="col-lg-2 col-md-3 col-12">
+	                            <select class="form-select" name="searchKey">
+	                                <option value="memberId" th:selected="${searchKey == 'memberid'}">회원아이디</option>
+	                                <option value="memberName" th:selected="${searchKey == 'memberName'}">회원이름</option>
+	                                <option value="memberEmail" th:selected="${searchKey == 'memberemail'}">회원이메일</option>
+	                            </select>
+	                        </div>
+	                    	<div class="col-lg-4 col-md-5">
+	                        	<input type="text" name="searchValue" th:value="${searchValue}" placeholder="검색어를 입력해주세요." class="form-control" />
+	                        </div>
+	                        <div class="col-lg-1 col-md-1 me-auto">
+	                        	<button id="searchBtn" type="submit" class="form-control btn btn-primary">검색</button>
+	                        </div>
+	                        <div class="col-lg-2 col-md-3 col-12">
+	                            <select class="form-select">
+	                                <option>Show 20</option>
+	                                <option>Show 30</option>
+	                                <option>Show 40</option>
+	                            </select>
+	                        </div>
+	                    </div>
+                    </form>
+	            </header>
+	            <div class="card-body">
+		            <div class="table-responsive">
+		                <div class="table-responsive">
+		                    <table class="table align-middle table-nowrap mb-0">
+		                        <thead class="table-light text-center">
+		                            <tr>
+		                                <th scope="col">
+		                                    <div class="form-check align-middle">
+		                                        <input class="form-check-input" type="checkbox" id="transactionCheck01" />
+		                                        <label class="form-check-label" for="transactionCheck01"></label>
+		                                    </div>
+		                                </th>
+		                                <th class="align-middle" scope="col">회원아이디</th>
+		                                <th class="align-middle" scope="col">회원비밀번호</th>
+		                                <th class="align-middle" scope="col">회원등급</th>
+		                                <th class="align-middle" scope="col">회원등급이름</th>
+		                                <th class="align-middle" scope="col">회원주소</th>
+		                                <th class="align-middle" scope="col">회원상세주소</th>
+		                                <th class="align-middle" scope="col">회원우편번호</th>
+		                                <th class="align-middle" scope="col">회원연락처</th>
+		                                <th class="align-middle" scope="col">회원이메일</th>
+		                                <th class="align-middle" scope="col">회원등록일자</th>
+		                                <th class="align-middle" scope="col">수정</th>
+		                                <th class="align-middle" scope="col">삭제</th>
+		                            </tr>
+		                        </thead>
+		                        <tbody class="text-center">
+		                            <tr th:if="${!#lists.isEmpty(memberList)}"
+		                            	th:each="l : ${memberList}">
+		                                <td>
+		                                    <div class="form-check">
+		                                        <input class="form-check-input check-member" type="checkbox" th:value="${l.memberId}" />
+		                                    </div>
+		                                </td>
+		                                <td><a th:href="@{/admin/member/modifyMember(memberId=${l.memberId})}" class="fw-bold" th:text="${l.memberId}">ksmartid1</a></td>
+		                                <td th:text="${l.memberPw}">ksmartpw1</td>
+		                                <td th:text="${l.memberGrade}">mbr_grd_1</td>
+		                                <td>
+		                                    <th:block th:switch="${l.memberGrade}">
+		                                    	<span th:case="${'mbr_grd_1'}"
+		                                    		  class="badge badge-pill badge-soft-success">관리자</span>
+		                                    	<span th:case="${'mbr_grd_2'}"
+		                                    		  class="badge badge-pill badge-soft-info">판매자</span>
+		                                    	<span th:case="${'mbr_grd_3'}"
+		                                    		  class="badge badge-pill badge-soft-warning">구매자</span>
+		                                    	<span th:case="*"
+		                                    		  class="badge badge-pill badge-soft-primary">일반회원</span>
+		                                    </th:block>
+		                                </td>
+		                                <td th:text="${l.memberAddress}">전북 전주시 덕진구 기린대로 499</td>
+		                                <td th:text="${l.memberDetailAddress}">3층 한국스마트정보교육원</td>
+		                                <td th:text="${l.memberZip}">54888</td>
+		                                <td th:text="${l.memberTelNo}">063-717-1008</td>
+		                                <td th:text="${l.memberEmail}">ksmartid1@ksmart.or.kr</td>
+		                                <td th:text="${l.memberRegDate}">2025년 04월 21일</td>
+		                                <td>
+		                                    <a th:href="@{/admin/member/modifyMember(memberId=${l.memberId})}" class="btn btn-warning btn-sm text-white">수정</a>
+		                                </td>
+		                                <td>
+		                                    <a href="#" class="btn btn-danger btn-sm remove-btn"
+		                                       th:data-member-id="${l.memberId}">탈퇴</a>
+		                                </td>
+		                            </tr>
+		                            <tr th:unless="${!#lists.isEmpty(memberList)}">
+		                            	<td colspan="12">등록없음</td>
+		                            </tr>
+		                        </tbody>
+		                    </table>
+		                </div>
+		            </div>
+		            <!-- table-responsive end// -->
+	         	</div>
+	         </div>
+	                <div class="pagination-area mt-30 mb-50">
+	                    <nav aria-label="Page navigation example">
+	                        <ul class="pagination justify-content-center">
+	                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">02</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">03</a></li>
+	                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+	                            <li class="page-item"><a class="page-link" href="#">16</a></li>
+	                            <li class="page-item">
+	                                <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
+	                            </li>
+	                        </ul>
+	                    </nav>
+	                </div>
+	            <!-- content-main end// -->
+	</th:block>
+</html>
